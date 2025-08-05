@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>📝 TASKER</title>
+</head>
+	
+	
+	<style>
+	
+			body {
+		font-size: 200%;
+		background-color: #000;  /* Dark grey color */
+		color: #fff;             /* White text color */
+		margin: 0;
+		padding: 0;
+		height: 100vh;
+		overflow: hidden;
+	}
+		
+		#menu {
+			display: none;
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background-color: #443;   /* Medium dark grey color for menu */
+			min-width: 90%;
+			max-width: 400px;
+			box-shadow: 16px 16px 16px 0px rgba(255,255,255,0.2); /* White shadow */
+			border-radius: 15px;
+			padding: 20px;
+			z-index: 1000;
+		}
+		
+		#menu .menu-title {
+			font-size: 1.2em;
+			font-weight: bold;
+			color: #fff;
+			margin-bottom: 15px;
+			padding-bottom: 10px;
+			border-bottom: 1px solid #666;
+			text-align: center;
+		}
+		
+		#menu .menu-item {
+			padding: 12px 15px;
+			margin: 8px 0;
+			background-color: #555;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: background-color 0.2s;
+			text-align: center;
+			font-size: 1.1em;
+		}
+		
+		#menu .menu-item:hover {
+			background-color: #666;
+		}
+		
+		#menu .menu-item:active {
+			background-color: #777;
+		}
+		
+		#allTasks, #todayTasks, #completedTasks {
+
+		    font-family: 'Courier New', courier, monospace;
+			font-size: 1em; /* Ensure consistent font size across all sections */
+
+			overflow-y: auto;
+			line-height: 2.5em;
+			color: #fff;   /* White text color for task lists */
+			padding: 10px;
+			margin: 0;
+		}
+		
+			#taskLists {
+		height: calc(100vh - 120px); /* Full height minus buttons and input */
+		overflow-y: auto;
+	}
+	
+	/* Mobile-specific styles */
+	@media screen and (max-width: 768px) {
+		body {
+			font-size: 150%; /* Slightly smaller font for mobile */
+		}
+		
+		#all, #today, #completed {
+			height: calc(100vh - 140px); /* Account for mobile nav and bottom buttons */
+		}
+		
+		.nav-buttons button, .bottom-buttons button {
+			font-size: 100%;
+			padding: 2% 3%;
+		}
+		
+		button {
+			font-size: 100%;
+			padding: 2% 3%;
+			margin: 0.5%;
+		}
+		
+		input[type="text"], input[type="button"] {
+			font-size: 100%;
+			padding: 2% 3%;
+			margin: 0.5%;
+		}
+		
+		.input-container {
+			padding: 5px;
+			gap: 5px;
+		}
+	}
+	
+	/* Extra small mobile devices */
+	@media screen and (max-width: 480px) {
+		#all, #today, #completed {
+			height: calc(100vh - 120px); /* Even more optimized for small screens */
+		}
+		
+		body {
+			font-size: 120%; /* Even smaller font for very small screens */
+		}
+		
+		.nav-buttons, .bottom-buttons {
+			padding: 5px;
+		}
+		
+		.nav-buttons button, .bottom-buttons button {
+			font-size: 90%;
+			padding: 1% 2%;
+		}
+	}
+	
+	/* Navigation buttons container */
+	.nav-buttons {
+		display: flex;
+		justify-content: space-around;
+		padding: 10px;
+		background-color: #000;
+		border-bottom: 1px solid #333;
+	}
+	
+	.nav-buttons button {
+		flex: 1;
+		margin: 0 5px;
+	}
+	
+	/* Bottom buttons container */
+	.bottom-buttons {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		display: flex;
+		justify-content: space-around;
+		padding: 10px;
+		background-color: #000;
+		border-top: 1px solid #333;
+	}
+	
+	.bottom-buttons button {
+		flex: 1;
+		margin: 0 5px;
+	}
+	
+	/* Input container for search bar and ADD button */
+	.input-container {
+		display: flex;
+		align-items: center;
+		padding: 10px;
+		gap: 10px;
+	}
+	
+	.input-container input[type="text"] {
+		flex: 1;
+		margin: 0;
+	}
+	
+	.input-container button {
+		margin: 0;
+		white-space: nowrap;
+	}
+	
+	/* Ensure full height containers */
+	#all, #today, #completed {
+		height: calc(100vh - 120px); /* Account for top nav and bottom buttons */
+		display: flex;
+		flex-direction: column;
+		padding-bottom: 60px; /* Space for bottom buttons */
+	}
+	
+	#all #taskLists, #today #taskLists, #completed #taskLists {
+		flex: 1;
+		overflow-y: auto;
+	}
+
+		
+		
+		button {
+			font-size: 120%;
+			padding: 1% 5%;
+			margin: 1%;
+			border-radius: 10px;
+			background-color: #333; /* Medium dark grey color */
+			border: none;
+			color: white; /* White text color */
+		}
+		
+		input[type="text"], input[type="button"] {
+			font-size: 120%;
+			padding: 1% 5%;
+			margin: 1%;
+			border-radius: 10px;
+			background-color: #333; /* Medium dark grey color */
+			font-family: 'Courier New', courier, monospace;
+			color: white; /* White text color */
+		}
+	
+	
+	.button-clicked {
+		border: 1px solid yellow; /* Yellow border */
+		color: white; /* White text color */
+		background-color: #555; /* Medium dark grey color */
+	}
+
+	.end-day-button {
+		color: #f30; /* White text color */
+		background-color: #333; /* Medium dark grey color */
+	}
+
+
+	
+	
+	</style>
+</head>
+<body>
+    <!-- Top Navigation Buttons -->
+    <div class="nav-buttons">
+        <button onclick="show('all')">ALL</button>
+        <button onclick="show('today')">TODAY</button>
+        <button onclick="show('completed')">COMPLETED</button>
+    </div>
+	
+    <div id="all">
+        <div class="input-container">
+            <input type="text" id="taskInput" onkeydown="if (event.keyCode == 13) addTask()" placeholder="Enter new task...">
+            <button onclick="addTask()">ADD</button>
+            <label style="color: #888; font-size: 0.8em; margin-left: 10px;">
+                <input type="checkbox" id="showCompletedCheckbox" onchange="show('all')" style="margin-right: 5px;">
+                Show completed
+            </label>
+        </div>
+		<div id='taskLists'>
+            <div id="allTasks"></div>
+		</div>
+    </div>
+
+    <div id="today" style="display:none">
+	    <div id='taskLists'>
+            <div id="todayTasks"></div>
+	    </div>
+    </div>
+
+    <div id="completed" style="display:none">
+	    <div id='taskLists'>
+            <div id="completedTasks"></div>
+	    </div>
+    </div>
+
+    <!-- Bottom Fixed Buttons -->
+    <div class="bottom-buttons">
+        <button onclick="downloadTasks()">DOWNLOAD</button>
+        <button onclick="uploadTasks()">UPLOAD</button>
+        <button class="end-day-button" onclick="endDay()">END DAY</button>
+        <button class="clear-cache-button" onclick="clearCache()">UPDATE</button>
+    </div>
+
+    <div id="menu"></div>
+
+
+    <script>
+	
+        // Let CSS handle the height for better mobile responsiveness
+        // Removed dynamic height setting to allow CSS media queries to work properly
+		
+        class Task {
+            constructor(name) {
+                this.name = name;
+                this.status = 0;
+                this.date_created = Date.now();
+                this.dates_completed = [];
+                this.recurring = false;
+            }
+        }
+
+        let tasks = [];
+        let selectedTaskIndex = null;
+		
+		function addTask() {
+			let taskName = document.getElementById('taskInput').value;
+			
+			// Check if the input field is not blank
+			if (taskName.trim() !== '') {
+				tasks.unshift(new Task(taskName)); 
+				localStorage.setItem('tasks', JSON.stringify(tasks)); 
+				document.getElementById('taskInput').value = '';
+				show('all');
+			}
+		}
+		
+		function clearServiceWorkerData() {
+		  caches.keys().then(function(names) {
+			for (let name of names) caches.delete(name);
+		  });
+		}
+
+
+
+        function showMenu(event, index) {
+            event.stopPropagation();
+            selectedTaskIndex = index;
+            let menu = document.getElementById('menu');
+            menu.style.display = 'block';
+            menu.innerHTML = `
+                <div class="menu-title">${tasks[index].name}</div>
+                <div class="menu-item" onclick="renameTask()">Rename</div>
+                <div class="menu-item" onclick="toggleRecurring()">Set Recurring ${tasks[index].recurring ? 'False' : 'True'}</div>
+                <div class="menu-item" onclick="deleteTask()">Delete</div>
+                <div class="menu-item" onclick="completeTask()">Complete</div>
+                <div class="menu-item" onclick="setStatus2AndAddTask()">Check and Add New Task</div>
+            `;
+        }
+		
+		
+		function setStatus2AndAddTask() {
+			tasks[selectedTaskIndex].status = 2;
+			let taskName = prompt('Enter new task name');
+			
+						// Check if taskName is null or empty
+			if (!taskName) {
+				hideMenu();
+				show(getCurrentSection());
+				return; // Exit the function early
+			}
+			tasks.push(new Task(taskName));
+			hideMenu();
+			localStorage.setItem('tasks', JSON.stringify(tasks));
+			show(getCurrentSection());
+		}
+
+        function hideMenu() {
+            document.getElementById('menu').style.display = 'none';
+        }
+
+        function getCurrentSection() {
+            const activeButton = document.querySelector('.nav-buttons button.button-clicked');
+            if (activeButton) {
+                const onclick = activeButton.getAttribute('onclick');
+                if (onclick.includes("show('all')")) return 'all';
+                if (onclick.includes("show('today')")) return 'today';
+                if (onclick.includes("show('completed')")) return 'completed';
+            }
+            return 'all'; // default fallback
+        }
+
+        function renameTask() {
+            let newName = prompt('Enter new name', tasks[selectedTaskIndex].name);
+            if (newName) {
+                tasks[selectedTaskIndex].name = newName;
+            }
+			localStorage.setItem('tasks', JSON.stringify(tasks));
+            hideMenu();
+            show(getCurrentSection());
+        }
+
+        function toggleRecurring() {
+            tasks[selectedTaskIndex].recurring = !tasks[selectedTaskIndex].recurring;
+            hideMenu();
+			localStorage.setItem('tasks', JSON.stringify(tasks));
+            show(getCurrentSection());
+        }
+
+        function deleteTask() {
+            tasks.splice(selectedTaskIndex, 1);
+            hideMenu();
+			localStorage.setItem('tasks', JSON.stringify(tasks));
+            show(getCurrentSection());
+        }
+
+        function completeTask() {
+            tasks[selectedTaskIndex].status = 2;
+            tasks[selectedTaskIndex].dates_completed.push(Date().now());
+			localStorage.setItem('tasks', JSON.stringify(tasks));
+            hideMenu();
+            show(getCurrentSection());
+        }
+
+		document.getElementById('taskInput').addEventListener('input', function() {
+			// Only search if 3 or more characters are entered
+			if (this.value.length >= 3 || this.value.length === 0) {
+				show('all');
+			}
+		});
+
+
+
+	function show(section) {
+		// Remove the 'button-clicked' class from all navigation buttons
+		document.querySelectorAll('.nav-buttons button').forEach(button => {
+			button.classList.remove('button-clicked');
+		});
+
+		// Add the 'button-clicked' class to the clicked button
+		document.querySelector(`.nav-buttons button[onclick="show('${section}')"]`).classList.add('button-clicked');
+
+		hideMenu();
+		document.getElementById('all').style.display = 'none';
+		document.getElementById('today').style.display = 'none';
+		document.getElementById('completed').style.display = 'none';
+
+		tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+		let filter = document.getElementById('taskInput').value.toLowerCase();
+
+		function matchesSearch(taskName, searchTerms) {
+			if (!searchTerms || searchTerms.trim() === '') return true;
+			const taskLower = taskName.toLowerCase();
+			const words = searchTerms.trim().split(/\s+/);
+			return words.every(word => taskLower.includes(word));
+		}
+
+		if (section === 'all') {
+			let allTasksDiv = document.getElementById('allTasks');
+			allTasksDiv.innerHTML = '';
+			tasks.forEach((task, index) => {
+				if (matchesSearch(task.name, filter)) {
+					// Check if task is completed (has completion dates)
+					const isCompleted = task.dates_completed.length > 0;
+					
+					// Check if user wants to see completed tasks
+					const showCompleted = document.getElementById('showCompletedCheckbox').checked;
+					
+					// Show all tasks that match search, including completed ones
+					// For the main view (no search), hide non-recurring completed tasks
+					// For search results, show all matching tasks if checkbox is checked
+					const shouldShow = filter.length === 0 ? 
+						!(task.recurring === false && isCompleted) : 
+						(isCompleted ? showCompleted : true); // Only show completed tasks if checkbox is checked
+					
+					if (shouldShow) {
+						const taskColor = isCompleted ? 'orange' : 'white';
+						let taskHtml = `<input type="checkbox" onclick="toggleAll(${index})" ${task.status > 0 ? 'checked' : ''}><label style="padding-left: 15px;"><span style="color: ${taskColor};" onclick="showMenu(event, ${index})">${task.name}</span>`;
+						
+						// Add completion date for completed tasks
+						if (isCompleted && task.dates_completed.length > 0) {
+							const lastCompletedDate = new Date(task.dates_completed[task.dates_completed.length - 1]).toLocaleDateString('en-US', { 
+								year: 'numeric', 
+								month: 'short', 
+								day: 'numeric' 
+							});
+							taskHtml += `<span style="color: #888; font-size: 0.7em; margin-left: 10px;">last completed: ${lastCompletedDate}</span>`;
+						}
+						
+						taskHtml += '<br>';
+						allTasksDiv.innerHTML += taskHtml;
+					}
+				}
+			});
+			document.getElementById('all').style.display = 'block';
+		} else if (section === 'today') {
+			let todayTasksDiv = document.getElementById('todayTasks');
+			todayTasksDiv.innerHTML = '';
+			tasks.forEach((task, index) => {
+				if (task.status > 0) {
+					todayTasksDiv.innerHTML += `<input type="checkbox" onclick="toggleToday(${index})" ${task.status === 2 ? 'checked' : ''}><label style="padding-left: 15px;"><span onclick="showMenu(event, ${index})">${task.name}</span><br>`;
+				}
+			});
+			document.getElementById('today').style.display = 'block';
+		} else if (section === 'completed') {
+			let completedTasksDiv = document.getElementById('completedTasks');
+			completedTasksDiv.innerHTML = '';
+			tasks.forEach((task) => {
+				if (task.dates_completed.length > 0) {
+					task.dates_completed.forEach(date => {
+						let formattedDate = new Date(date).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+						completedTasksDiv.innerHTML += `<span>${formattedDate} </span><span style="color: orange;">${task.name} </span><br>`;
+					});
+				}
+			});
+			document.getElementById('completed').style.display = 'block';
+		}
+	}
+
+
+		// Call show function on page load to display existing tasks
+		window.onload = function() {
+			show('all');
+		}
+
+        function toggleAll(index) {
+            tasks[index].status = tasks[index].status > 0 ? 0 : 1;
+			localStorage.setItem('tasks', JSON.stringify(tasks)); // Save tasks to localStorage
+
+            show('all');
+        }
+
+        function toggleToday(index) {
+            tasks[index].status = tasks[index].status === 2 ? 1 : 2;
+			localStorage.setItem('tasks', JSON.stringify(tasks)); // Save tasks to localStorage
+
+            show('today');
+        }
+
+        function endDay() {
+            // Check if we're currently in the today section
+            const currentSection = getCurrentSection();
+            
+            if (currentSection !== 'today') {
+                // If not in today section, navigate to it first
+                show('today');
+            } else {
+                // If already in today section, show the confirmation dialog
+                if (confirm('Are you sure you want to end the day?')) {
+                    tasks.forEach((task) => {
+                        if (task.status === 2) {
+                            task.dates_completed.push(Date.now());
+                        }
+                        task.status = 0;
+                    });
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                    show('today');
+                }
+            }
+        }
+		
+		
+		function downloadTasks() {
+			let json = JSON.stringify(tasks);
+			let a = document.createElement("a");
+			a.href = URL.createObjectURL(new Blob([json], {type: 'application/json'}));
+			a.download = "tasks.json";
+			a.click();
+		}
+
+		function uploadTasks() {
+			let input = document.createElement('input');
+			input.type = 'file';
+			input.onchange = (e) => {
+				let file = e.target.files[0];
+				let reader = new FileReader();
+				reader.onload = () => {
+					tasks = JSON.parse(reader.result);
+					localStorage.setItem('tasks', JSON.stringify(tasks)); // Store the uploaded tasks in localStorage
+					show('all'); // Refresh the page with the uploaded tasks
+				 }
+				reader.readAsText(file);
+			 };
+			input.click();
+		}
+
+
+        function clearCache() {
+            const message = "Clear cache to check for app updates and override the service worker? This will reload the page to get the latest version.";
+            if (confirm(message)) {
+                if ('caches' in window) {
+                    caches.keys().then(function(cacheNames) {
+                        return Promise.all(
+                            cacheNames.map(function(cacheName) {
+                                return caches.delete(cacheName);
+                            })
+                        );
+                    }).then(function() {
+                        console.log('Caches cleared');
+                        alert('Cache cleared successfully. Reloading page to get the latest version.');
+                        window.location.reload(true);
+                    }).catch(function(error) {
+                        console.error('Error clearing cache:', error);
+                        alert('Error clearing cache. Please try again.');
+                    });
+                } else {
+                    console.log('Cache API not supported');
+                    alert('Cache clearing not supported in this browser.');
+                }
+            }
+        }
+
+
+        window.onclick = hideMenu;
+		
+			if ('serviceWorker' in navigator) {
+	  window.addEventListener('load', function() {
+		navigator.serviceWorker.register('/sw.js').then(
+		  function(registration) {
+			// Registration was successful
+			console.log('ServiceWorker registration successful with scope: ', registration.scope);
+		  },
+		  function(err) {
+			// registration failed :(
+			console.log('ServiceWorker registration failed: ', err);
+		  }
+		);
+	  });
+	}
+    </script>
+</body>
+</html>
