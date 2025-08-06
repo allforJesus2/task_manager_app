@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="A simple task management app">
+    <link rel="manifest" href="/manifest.json">
     <title>📝 TASKER</title>
 </head>
 	
@@ -247,10 +250,6 @@
         <div class="input-container">
             <input type="text" id="taskInput" onkeydown="if (event.keyCode == 13) addTask()" placeholder="Enter new task...">
             <button onclick="addTask()">ADD</button>
-            <label style="color: #888; font-size: 0.8em; margin-left: 10px;">
-                <input type="checkbox" id="showCompletedCheckbox" onchange="show('all')" style="margin-right: 5px;">
-                Show completed
-            </label>
         </div>
 		<div id='taskLists'>
             <div id="allTasks"></div>
@@ -306,7 +305,10 @@
 				tasks.unshift(new Task(taskName)); 
 				localStorage.setItem('tasks', JSON.stringify(tasks)); 
 				document.getElementById('taskInput').value = '';
-				show('all');
+				// Clear any pending search timeout
+				clearTimeout(searchTimeout);
+				// Update the task list with empty filter to show all tasks
+				updateTaskList('').catch(console.error);
 			}
 		}
 		
@@ -341,13 +343,13 @@
 						// Check if taskName is null or empty
 			if (!taskName) {
 				hideMenu();
-				show(getCurrentSection());
+				show(getCurrentSection()).catch(console.error);
 				return; // Exit the function early
 			}
 			tasks.push(new Task(taskName));
 			hideMenu();
 			localStorage.setItem('tasks', JSON.stringify(tasks));
-			show(getCurrentSection());
+			show(getCurrentSection()).catch(console.error);
 		}
 
         function hideMenu() {
@@ -372,21 +374,21 @@
             }
 			localStorage.setItem('tasks', JSON.stringify(tasks));
             hideMenu();
-            show(getCurrentSection());
+            show(getCurrentSection()).catch(console.error);
         }
 
         function toggleRecurring() {
             tasks[selectedTaskIndex].recurring = !tasks[selectedTaskIndex].recurring;
             hideMenu();
 			localStorage.setItem('tasks', JSON.stringify(tasks));
-            show(getCurrentSection());
+            show(getCurrentSection()).catch(console.error);
         }
 
         function deleteTask() {
             tasks.splice(selectedTaskIndex, 1);
             hideMenu();
 			localStorage.setItem('tasks', JSON.stringify(tasks));
-            show(getCurrentSection());
+            show(getCurrentSection()).catch(console.error);
         }
 
         function completeTask() {
@@ -394,19 +396,109 @@
             tasks[selectedTaskIndex].dates_completed.push(Date().now());
 			localStorage.setItem('tasks', JSON.stringify(tasks));
             hideMenu();
-            show(getCurrentSection());
+            show(getCurrentSection()).catch(console.error);
         }
 
+		// Debounced search function to prevent input field reset
+		let searchTimeout;
 		document.getElementById('taskInput').addEventListener('input', function() {
-			// Only search if 3 or more characters are entered
+			// Clear previous timeout
+			clearTimeout(searchTimeout);
+			
+			// Only search if 3 or more characters are entered or if cleared
 			if (this.value.length >= 3 || this.value.length === 0) {
-				show('all');
+				// Debounce the search to prevent rapid firing
+				searchTimeout = setTimeout(() => {
+					// Store current input value
+					const currentValue = this.value;
+					
+					// Only update if we're in the 'all' section
+					const currentSection = getCurrentSection();
+					if (currentSection === 'all') {
+						updateTaskList(currentValue).catch(console.error);
+					}
+				}, 300); // 300ms delay
 			}
 		});
 
+		// Function to update only the task list without affecting the input field
+		async function updateTaskList(filterValue) {
+			if (!tasks) {
+				tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+			}
+			
+			let allTasksDiv = document.getElementById('allTasks');
+			if (!allTasksDiv) return;
+			
+			// Store current focus state
+			const taskInput = document.getElementById('taskInput');
+			const wasFocused = document.activeElement === taskInput;
+			const cursorPosition = wasFocused ? taskInput.selectionStart : 0;
+			
+			showLoadingIndicator('allTasks');
+			
+			// Filter tasks asynchronously
+			const filteredTasks = [];
+			await new Promise((resolve) => {
+				setTimeout(() => {
+					tasks.forEach((task, index) => {
+						if (matchesSearch(task.name, filterValue)) {
+							const isCompleted = task.dates_completed.length > 0;
+							const shouldShow = filterValue.length === 0 ? 
+								!(task.recurring === false && isCompleted) : 
+								true;
+							
+							if (shouldShow) {
+								filteredTasks.push({ task, index });
+							}
+						}
+					});
+					resolve();
+				}, 0);
+			});
+
+			// Render tasks in batches
+			allTasksDiv.innerHTML = '';
+			await renderTasksBatch(filteredTasks, allTasksDiv, ({ task, index }) => {
+				const isCompleted = task.dates_completed.length > 0;
+				const taskColor = isCompleted ? 'orange' : 'white';
+				let taskHtml = `<input type="checkbox" onclick="toggleAll(${index})" ${task.status > 0 ? 'checked' : ''}><label style="padding-left: 15px;"><span style="color: ${taskColor};" onclick="showMenu(event, ${index})">${task.name}</span>`;
+				
+				// Add completion date for completed tasks
+				if (isCompleted && task.dates_completed.length > 0) {
+					const lastCompletedDate = new Date(task.dates_completed[task.dates_completed.length - 1]).toLocaleDateString('en-US', { 
+						year: 'numeric', 
+						month: 'short', 
+						day: 'numeric' 
+					});
+					taskHtml += `<span style="color: #888; font-size: 0.7em; margin-left: 10px;">last completed: ${lastCompletedDate}</span>`;
+				}
+				
+				taskHtml += '<br>';
+				allTasksDiv.innerHTML += taskHtml;
+			}, 15);
+			
+			// Restore focus and cursor position if it was focused before
+			if (wasFocused) {
+				taskInput.focus();
+				taskInput.setSelectionRange(cursorPosition, cursorPosition);
+			}
+		}
+
+		function matchesSearch(taskName, searchTerms) {
+			if (!searchTerms || searchTerms.trim() === '') return true;
+			const taskLower = taskName.toLowerCase();
+			const words = searchTerms.trim().split(/\s+/);
+			return words.every(word => taskLower.includes(word));
+		}
 
 
-	function show(section) {
+
+	async function show(section) {
+		// Store current input value to preserve it
+		const taskInput = document.getElementById('taskInput');
+		const currentInputValue = taskInput.value;
+		
 		// Remove the 'button-clicked' class from all navigation buttons
 		document.querySelectorAll('.nav-buttons button').forEach(button => {
 			button.classList.remove('button-clicked');
@@ -419,98 +511,82 @@
 		document.getElementById('all').style.display = 'none';
 		document.getElementById('today').style.display = 'none';
 		document.getElementById('completed').style.display = 'none';
+		
+		// Restore input value after section change
+		setTimeout(() => {
+			taskInput.value = currentInputValue;
+		}, 0);
 
-		tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+		// Load tasks asynchronously
+		const loadTasks = () => {
+			return new Promise((resolve) => {
+				setTimeout(() => {
+					const tasksData = localStorage.getItem('tasks');
+					const loadedTasks = tasksData ? JSON.parse(tasksData) : [];
+					resolve(loadedTasks);
+				}, 0);
+			});
+		};
 
-		let filter = document.getElementById('taskInput').value.toLowerCase();
-
-		function matchesSearch(taskName, searchTerms) {
-			if (!searchTerms || searchTerms.trim() === '') return true;
-			const taskLower = taskName.toLowerCase();
-			const words = searchTerms.trim().split(/\s+/);
-			return words.every(word => taskLower.includes(word));
-		}
+		tasks = await loadTasks();
 
 		if (section === 'all') {
-			let allTasksDiv = document.getElementById('allTasks');
-			allTasksDiv.innerHTML = '';
-			tasks.forEach((task, index) => {
-				if (matchesSearch(task.name, filter)) {
-					// Check if task is completed (has completion dates)
-					const isCompleted = task.dates_completed.length > 0;
-					
-					// Check if user wants to see completed tasks
-					const showCompleted = document.getElementById('showCompletedCheckbox').checked;
-					
-					// Show all tasks that match search, including completed ones
-					// For the main view (no search), hide non-recurring completed tasks
-					// For search results, show all matching tasks if checkbox is checked
-					const shouldShow = filter.length === 0 ? 
-						!(task.recurring === false && isCompleted) : 
-						(isCompleted ? showCompleted : true); // Only show completed tasks if checkbox is checked
-					
-					if (shouldShow) {
-						const taskColor = isCompleted ? 'orange' : 'white';
-						let taskHtml = `<input type="checkbox" onclick="toggleAll(${index})" ${task.status > 0 ? 'checked' : ''}><label style="padding-left: 15px;"><span style="color: ${taskColor};" onclick="showMenu(event, ${index})">${task.name}</span>`;
-						
-						// Add completion date for completed tasks
-						if (isCompleted && task.dates_completed.length > 0) {
-							const lastCompletedDate = new Date(task.dates_completed[task.dates_completed.length - 1]).toLocaleDateString('en-US', { 
-								year: 'numeric', 
-								month: 'short', 
-								day: 'numeric' 
-							});
-							taskHtml += `<span style="color: #888; font-size: 0.7em; margin-left: 10px;">last completed: ${lastCompletedDate}</span>`;
-						}
-						
-						taskHtml += '<br>';
-						allTasksDiv.innerHTML += taskHtml;
-					}
-				}
-			});
 			document.getElementById('all').style.display = 'block';
+			// Use the updateTaskList function to preserve input field
+			await updateTaskList(document.getElementById('taskInput').value.toLowerCase());
+
 		} else if (section === 'today') {
 			let todayTasksDiv = document.getElementById('todayTasks');
-			todayTasksDiv.innerHTML = '';
-			tasks.forEach((task, index) => {
-				if (task.status > 0) {
-					todayTasksDiv.innerHTML += `<input type="checkbox" onclick="toggleToday(${index})" ${task.status === 2 ? 'checked' : ''}><label style="padding-left: 15px;"><span onclick="showMenu(event, ${index})">${task.name}</span><br>`;
-				}
-			});
+			showLoadingIndicator('todayTasks');
 			document.getElementById('today').style.display = 'block';
+
+			const todayTasks = tasks.filter((task, index) => task.status > 0);
+			
+			todayTasksDiv.innerHTML = '';
+			await renderTasksBatch(todayTasks, todayTasksDiv, (task, index) => {
+				todayTasksDiv.innerHTML += `<input type="checkbox" onclick="toggleToday(${index})" ${task.status === 2 ? 'checked' : ''}><label style="padding-left: 15px;"><span onclick="showMenu(event, ${index})">${task.name}</span><br>`;
+			}, 20);
+
 		} else if (section === 'completed') {
 			let completedTasksDiv = document.getElementById('completedTasks');
-			completedTasksDiv.innerHTML = '';
+			showLoadingIndicator('completedTasks');
+			document.getElementById('completed').style.display = 'block';
+
+			const completedTasks = [];
 			tasks.forEach((task) => {
 				if (task.dates_completed.length > 0) {
 					task.dates_completed.forEach(date => {
-						let formattedDate = new Date(date).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-						completedTasksDiv.innerHTML += `<span>${formattedDate} </span><span style="color: orange;">${task.name} </span><br>`;
+						completedTasks.push({ task, date });
 					});
 				}
 			});
-			document.getElementById('completed').style.display = 'block';
+
+			completedTasksDiv.innerHTML = '';
+			await renderTasksBatch(completedTasks, completedTasksDiv, ({ task, date }) => {
+				let formattedDate = new Date(date).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+				completedTasksDiv.innerHTML += `<span>${formattedDate} </span><span style="color: orange;">${task.name} </span><br>`;
+			}, 25);
 		}
 	}
 
 
 		// Call show function on page load to display existing tasks
 		window.onload = function() {
-			show('all');
+			show('all').catch(console.error);
 		}
 
         function toggleAll(index) {
             tasks[index].status = tasks[index].status > 0 ? 0 : 1;
 			localStorage.setItem('tasks', JSON.stringify(tasks)); // Save tasks to localStorage
 
-            show('all');
+            show('all').catch(console.error);
         }
 
         function toggleToday(index) {
             tasks[index].status = tasks[index].status === 2 ? 1 : 2;
 			localStorage.setItem('tasks', JSON.stringify(tasks)); // Save tasks to localStorage
 
-            show('today');
+            show('today').catch(console.error);
         }
 
         function endDay() {
@@ -519,7 +595,7 @@
             
             if (currentSection !== 'today') {
                 // If not in today section, navigate to it first
-                show('today');
+                show('today').catch(console.error);
             } else {
                 // If already in today section, show the confirmation dialog
                 if (confirm('Are you sure you want to end the day?')) {
@@ -530,7 +606,7 @@
                         task.status = 0;
                     });
                     localStorage.setItem('tasks', JSON.stringify(tasks));
-                    show('today');
+                    show('today').catch(console.error);
                 }
             }
         }
@@ -553,7 +629,7 @@
 				reader.onload = () => {
 					tasks = JSON.parse(reader.result);
 					localStorage.setItem('tasks', JSON.stringify(tasks)); // Store the uploaded tasks in localStorage
-					show('all'); // Refresh the page with the uploaded tasks
+					show('all').catch(console.error); // Refresh the page with the uploaded tasks
 				 }
 				reader.readAsText(file);
 			 };
@@ -587,22 +663,87 @@
         }
 
 
-        window.onclick = hideMenu;
+        		window.onclick = hideMenu;
 		
-			if ('serviceWorker' in navigator) {
-	  window.addEventListener('load', function() {
-		navigator.serviceWorker.register('/sw.js').then(
-		  function(registration) {
-			// Registration was successful
-			console.log('ServiceWorker registration successful with scope: ', registration.scope);
-		  },
-		  function(err) {
-			// registration failed :(
-			console.log('ServiceWorker registration failed: ', err);
-		  }
-		);
-	  });
-	}
+		// Add loading indicator styles
+		const loadingStyles = document.createElement('style');
+		loadingStyles.textContent = `
+			.loading-indicator {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				padding: 20px;
+				color: #fff;
+				font-size: 1.2em;
+			}
+			.loading-spinner {
+				width: 20px;
+				height: 20px;
+				border: 2px solid #333;
+				border-top: 2px solid #fff;
+				border-radius: 50%;
+				animation: spin 1s linear infinite;
+				margin-right: 10px;
+			}
+			@keyframes spin {
+				0% { transform: rotate(0deg); }
+				100% { transform: rotate(360deg); }
+			}
+		`;
+		document.head.appendChild(loadingStyles);
+
+		function showLoadingIndicator(containerId) {
+			const container = document.getElementById(containerId);
+			container.innerHTML = '<div class="loading-indicator"><div class="loading-spinner"></div>Loading tasks...</div>';
+		}
+
+		function renderTasksBatch(tasks, container, renderFunction, batchSize = 10) {
+			return new Promise((resolve) => {
+				let index = 0;
+				
+				function processBatch() {
+					const endIndex = Math.min(index + batchSize, tasks.length);
+					
+					for (let i = index; i < endIndex; i++) {
+						renderFunction(tasks[i], i);
+					}
+					
+					index = endIndex;
+					
+					if (index < tasks.length) {
+						// Use requestAnimationFrame for smooth rendering
+						requestAnimationFrame(processBatch);
+					} else {
+						resolve();
+					}
+				}
+				
+				requestAnimationFrame(processBatch);
+			});
+		}
+		
+		// Service Worker Registration
+		if ('serviceWorker' in navigator) {
+			window.addEventListener('load', function() {
+				navigator.serviceWorker.register('/sw.js')
+					.then(function(registration) {
+						console.log('ServiceWorker registration successful with scope: ', registration.scope);
+						
+						// Check for updates
+						registration.addEventListener('updatefound', function() {
+							const newWorker = registration.installing;
+							newWorker.addEventListener('statechange', function() {
+								if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+									console.log('New service worker available');
+								}
+							});
+						});
+					})
+					.catch(function(err) {
+						console.log('ServiceWorker registration failed: ', err);
+					});
+			});
+		}
     </script>
 </body>
 </html>
