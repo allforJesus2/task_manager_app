@@ -22,7 +22,7 @@
 		overflow: hidden;
 	}
 		
-		#menu {
+		#menu, #settingsMenu, #importTextDialog {
 			display: none;
 			position: fixed;
 			top: 50%;
@@ -37,7 +37,7 @@
 			z-index: 1000;
 		}
 		
-		#menu .menu-title {
+		#menu .menu-title, #settingsMenu .menu-title, #importTextDialog .menu-title {
 			font-size: 1.2em;
 			font-weight: bold;
 			color: #fff;
@@ -47,7 +47,7 @@
 			text-align: center;
 		}
 		
-		#menu .menu-item {
+		#menu .menu-item, #settingsMenu .menu-item, #importTextDialog .menu-item {
 			padding: 12px 15px;
 			margin: 8px 0;
 			background-color: #555;
@@ -58,11 +58,11 @@
 			font-size: 1.1em;
 		}
 		
-		#menu .menu-item:hover {
+		#menu .menu-item:hover, #settingsMenu .menu-item:hover, #importTextDialog .menu-item:hover {
 			background-color: #666;
 		}
 		
-		#menu .menu-item:active {
+		#menu .menu-item:active, #settingsMenu .menu-item:active, #importTextDialog .menu-item:active {
 			background-color: #777;
 		}
 		
@@ -233,6 +233,13 @@
 		background-color: #333; /* Medium dark grey color */
 	}
 
+	.close-button {
+		color: #f30; /* Orange text color */
+		background-color: #333; /* Medium dark grey color */
+	}
+
+
+
 
 	
 	
@@ -270,10 +277,30 @@
 
     <!-- Bottom Fixed Buttons -->
     <div class="bottom-buttons">
-        <button onclick="downloadTasks()">DOWNLOAD</button>
-        <button onclick="uploadTasks()">UPLOAD</button>
+        <button onclick="zoomIn()">ZOOM IN</button>
+        <button onclick="zoomOut()">ZOOM OUT</button>
         <button class="end-day-button" onclick="endDay()">END DAY</button>
-        <button class="clear-cache-button" onclick="clearCache()">UPDATE</button>
+        <button onclick="showSettings(event)" id="settingsButton">SETTINGS</button>
+    </div>
+
+    <!-- Settings Menu -->
+    <div id="settingsMenu" style="display: none;">
+        <div class="menu-title">Settings</div>
+        <div class="menu-item" onclick="downloadTasks()">Download Tasks</div>
+        <div class="menu-item" onclick="uploadTasks()">Upload Tasks</div>
+        <div class="menu-item" onclick="importFromText()">Import from Text</div>
+        <div class="menu-item" onclick="clearCache()">Update App</div>
+        <div class="menu-item close-button" onclick="hideSettings()">Close Menu</div>
+    </div>
+
+    <!-- Import Text Dialog -->
+    <div id="importTextDialog" style="display: none;">
+        <div class="menu-title">Import from Text</div>
+        <div style="margin: 15px 0;">
+            <textarea id="importTextArea" placeholder="Paste your tasks here, one per line..." style="width: 100%; height: 200px; background-color: #333; color: white; border: 1px solid #666; border-radius: 8px; padding: 10px; font-family: 'Courier New', courier, monospace; font-size: 0.9em; resize: vertical;"></textarea>
+        </div>
+        <div class="menu-item" onclick="processImportText()">Import Tasks</div>
+        <div class="menu-item close-button" onclick="hideImportDialog()">Cancel</div>
     </div>
 
     <div id="menu"></div>
@@ -332,6 +359,7 @@
                 <div class="menu-item" onclick="deleteTask()">Delete</div>
                 <div class="menu-item" onclick="completeTask()">Complete</div>
                 <div class="menu-item" onclick="setStatus2AndAddTask()">Check and Add New Task</div>
+                <div class="menu-item close-button" onclick="hideMenu()">Close Menu</div>
             `;
         }
 		
@@ -354,6 +382,65 @@
 
         function hideMenu() {
             document.getElementById('menu').style.display = 'none';
+        }
+
+        function showSettings(event) {
+            console.log('showSettings called');
+            if (event) {
+                event.stopPropagation(); // Prevent the click from bubbling up to window
+            }
+            const settingsMenu = document.getElementById('settingsMenu');
+            if (settingsMenu) {
+                settingsMenu.style.display = 'block';
+                console.log('Settings menu should be visible now');
+            } else {
+                console.error('settingsMenu element not found');
+            }
+        }
+
+        function hideSettings() {
+            console.log('hideSettings called');
+            const settingsMenu = document.getElementById('settingsMenu');
+            if (settingsMenu) {
+                settingsMenu.style.display = 'none';
+                console.log('Settings menu hidden');
+            } else {
+                console.error('settingsMenu element not found');
+            }
+        }
+
+        // Zoom functionality
+        let currentZoom = 100;
+        const zoomStep = 10;
+        const minZoom = 80;
+        const maxZoom = 200;
+
+        function zoomIn() {
+            if (currentZoom < maxZoom) {
+                currentZoom += zoomStep;
+                applyZoom();
+            }
+        }
+
+        function zoomOut() {
+            if (currentZoom > minZoom) {
+                currentZoom -= zoomStep;
+                applyZoom();
+            }
+        }
+
+        function applyZoom() {
+            document.body.style.fontSize = currentZoom + '%';
+            // Store zoom level in localStorage
+            localStorage.setItem('zoomLevel', currentZoom);
+        }
+
+        function loadZoomLevel() {
+            const savedZoom = localStorage.getItem('zoomLevel');
+            if (savedZoom) {
+                currentZoom = parseInt(savedZoom);
+                applyZoom();
+            }
         }
 
         function getCurrentSection() {
@@ -453,6 +540,10 @@
 							}
 						}
 					});
+					
+					// Sort tasks by creation date (newest first)
+					filteredTasks.sort((a, b) => b.task.date_created - a.task.date_created);
+					
 					resolve();
 				}, 0);
 			});
@@ -462,7 +553,9 @@
 			await renderTasksBatch(filteredTasks, allTasksDiv, ({ task, index }) => {
 				const isCompleted = task.dates_completed.length > 0;
 				const taskColor = isCompleted ? 'orange' : 'white';
-				let taskHtml = `<input type="checkbox" onclick="toggleAll(${index})" ${task.status > 0 ? 'checked' : ''}><label style="padding-left: 15px;"><span style="color: ${taskColor};" onclick="showMenu(event, ${index})">${task.name}</span>`;
+				// Use the original index from the main tasks array for accurate targeting
+				const originalIndex = tasks.indexOf(task);
+				let taskHtml = `<input type="checkbox" onclick="toggleAll(${originalIndex})" ${task.status > 0 ? 'checked' : ''}><label style="padding-left: 15px;"><span style="color: ${taskColor};" onclick="showMenu(event, ${originalIndex})">${task.name}</span>`;
 				
 				// Add completion date for completed tasks
 				if (isCompleted && task.dates_completed.length > 0) {
@@ -542,9 +635,14 @@
 
 			const todayTasks = tasks.filter((task, index) => task.status > 0);
 			
+			// Sort today tasks by creation date (newest first)
+			todayTasks.sort((a, b) => b.date_created - a.date_created);
+			
 			todayTasksDiv.innerHTML = '';
 			await renderTasksBatch(todayTasks, todayTasksDiv, (task, index) => {
-				todayTasksDiv.innerHTML += `<input type="checkbox" onclick="toggleToday(${index})" ${task.status === 2 ? 'checked' : ''}><label style="padding-left: 15px;"><span onclick="showMenu(event, ${index})">${task.name}</span><br>`;
+				// Find the original index of the task in the main tasks array
+				const originalIndex = tasks.findIndex(t => t === task);
+				todayTasksDiv.innerHTML += `<input type="checkbox" onclick="toggleToday(${originalIndex})" ${task.status === 2 ? 'checked' : ''}><label style="padding-left: 15px;"><span onclick="showMenu(event, ${originalIndex})">${task.name}</span><br>`;
 			}, 20);
 
 		} else if (section === 'completed') {
@@ -572,21 +670,48 @@
 
 		// Call show function on page load to display existing tasks
 		window.onload = function() {
+			loadZoomLevel(); // Load saved zoom level
 			show('all').catch(console.error);
+			
+			// Add backup event listener for settings button
+			const settingsButton = document.getElementById('settingsButton');
+			if (settingsButton) {
+				settingsButton.addEventListener('click', function(event) {
+					console.log('Settings button clicked via event listener');
+					showSettings(event);
+				});
+			}
+			
+			// Test if showSettings function is accessible
+			console.log('showSettings function available:', typeof showSettings);
 		}
 
         function toggleAll(index) {
             tasks[index].status = tasks[index].status > 0 ? 0 : 1;
 			localStorage.setItem('tasks', JSON.stringify(tasks)); // Save tasks to localStorage
 
-            show('all').catch(console.error);
+            // Update only the checkbox state without re-rendering the entire list
+            // Find the checkbox that was clicked by finding the one with the matching onclick attribute
+            const checkboxes = document.querySelectorAll('#allTasks input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                if (checkbox.getAttribute('onclick') === `toggleAll(${index})`) {
+                    checkbox.checked = tasks[index].status > 0;
+                }
+            });
         }
 
         function toggleToday(index) {
             tasks[index].status = tasks[index].status === 2 ? 1 : 2;
 			localStorage.setItem('tasks', JSON.stringify(tasks)); // Save tasks to localStorage
 
-            show('today').catch(console.error);
+            // Update only the checkbox state without re-rendering the entire list
+            // Find the checkbox that was clicked by finding the one with the matching onclick attribute
+            const checkboxes = document.querySelectorAll('#todayTasks input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                if (checkbox.getAttribute('onclick') === `toggleToday(${index})`) {
+                    checkbox.checked = tasks[index].status === 2;
+                }
+            });
         }
 
         function endDay() {
@@ -637,7 +762,7 @@
 		}
 
 
-        function clearCache() {
+        		function clearCache() {
             const message = "Clear cache to check for app updates and override the service worker? This will reload the page to get the latest version.";
             if (confirm(message)) {
                 if ('caches' in window) {
@@ -662,8 +787,62 @@
             }
         }
 
+		function importFromText() {
+			hideSettings();
+			document.getElementById('importTextDialog').style.display = 'block';
+			document.getElementById('importTextArea').focus();
+		}
 
-        		window.onclick = hideMenu;
+		function hideImportDialog() {
+			document.getElementById('importTextDialog').style.display = 'none';
+			document.getElementById('importTextArea').value = '';
+		}
+
+		function processImportText() {
+			const textArea = document.getElementById('importTextArea');
+			const text = textArea.value.trim();
+			
+			if (!text) {
+				alert('Please enter some text to import.');
+				return;
+			}
+			
+			// Split by newlines and filter out empty lines
+			const lines = text.split('\n').filter(line => line.trim() !== '');
+			
+			if (lines.length === 0) {
+				alert('No valid tasks found. Please enter at least one non-empty line.');
+				return;
+			}
+			
+			// Create new tasks from each line
+			let newTasksCount = 0;
+			lines.forEach(line => {
+				const trimmedLine = line.trim();
+				if (trimmedLine !== '') {
+					tasks.unshift(new Task(trimmedLine));
+					newTasksCount++;
+				}
+			});
+			
+			// Save to localStorage
+			localStorage.setItem('tasks', JSON.stringify(tasks));
+			
+			// Close dialog and refresh
+			hideImportDialog();
+			show(getCurrentSection()).catch(console.error);
+			
+			// Show success message
+			alert(`Successfully imported ${newTasksCount} task${newTasksCount !== 1 ? 's' : ''}!`);
+		}
+
+
+        		window.onclick = function(event) {
+        			// Hide all menus when clicking outside
+        			//hideMenu();
+        			//hideSettings();
+        			//hideImportDialog();
+        		};
 		
 		// Add loading indicator styles
 		const loadingStyles = document.createElement('style');
