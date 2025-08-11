@@ -28,10 +28,15 @@
 			top: 50%;
 			left: 50%;
 			transform: translate(-50%, -50%);
-			background-color: #443;   /* Medium dark grey color for menu */
-			min-width: 90%;
-			max-width: 400px;
-			box-shadow: 16px 16px 16px 0px rgba(255,255,255,0.2); /* White shadow */
+			background-color: #000;   /* Black fill for menu */
+			min-width: 70%;
+			max-width: 350px;
+			box-shadow: 
+				16px 16px 16px 0px rgba(255,255,255,0.2), /* White shadow */
+				0 0 0 3px rgba(255, 180, 60, 0.8), /* Soft orangey yellow border */
+				0 0 20px rgba(255, 180, 60, 0.6), /* Inner glow */
+				0 0 40px rgba(255, 180, 60, 0.4), /* Outer glow */
+				0 0 80px rgba(255, 180, 60, 0.2); /* Extended glow */
 			border-radius: 15px;
 			padding: 20px;
 			z-index: 1000;
@@ -45,25 +50,50 @@
 			padding-bottom: 10px;
 			border-bottom: 1px solid #666;
 			text-align: center;
+			text-shadow: 
+				0 0 10px rgba(255, 255, 255, 0.8),
+				0 0 20px rgba(255, 255, 255, 0.6);
 		}
 		
 		#menu .menu-item, #settingsMenu .menu-item, #importTextDialog .menu-item {
 			padding: 12px 15px;
 			margin: 8px 0;
-			background-color: #555;
+			background-color: #000;
+			border: 2px solid rgba(255, 180, 60, 0.6);
 			border-radius: 8px;
 			cursor: pointer;
-			transition: background-color 0.2s;
+			transition: all 0.3s ease;
 			text-align: center;
 			font-size: 1.1em;
+			color: #fff;
+			text-shadow: 
+				0 0 8px rgba(255, 255, 255, 0.7),
+				0 0 16px rgba(255, 255, 255, 0.5);
+			box-shadow: 
+				0 0 10px rgba(255, 180, 60, 0.4),
+				inset 0 0 10px rgba(255, 180, 60, 0.1);
 		}
 		
 		#menu .menu-item:hover, #settingsMenu .menu-item:hover, #importTextDialog .menu-item:hover {
-			background-color: #666;
+			background-color: #111;
+			border-color: rgba(255, 180, 60, 0.8);
+			text-shadow: 
+				0 0 12px rgba(255, 255, 255, 0.9),
+				0 0 20px rgba(255, 255, 255, 0.7);
+			box-shadow: 
+				0 0 15px rgba(255, 180, 60, 0.6),
+				inset 0 0 15px rgba(255, 180, 60, 0.2);
 		}
 		
 		#menu .menu-item:active, #settingsMenu .menu-item:active, #importTextDialog .menu-item:active {
-			background-color: #777;
+			background-color: #222;
+			border-color: rgba(255, 180, 60, 1);
+			text-shadow: 
+				0 0 15px rgba(255, 255, 255, 1),
+				0 0 25px rgba(255, 255, 255, 0.8);
+			box-shadow: 
+				0 0 20px rgba(255, 180, 60, 0.8),
+				inset 0 0 20px rgba(255, 180, 60, 0.3);
 		}
 		
 		#allTasks, #todayTasks, #completedTasks {
@@ -79,7 +109,7 @@
 		}
 		
 			#taskLists {
-		height: calc(100vh - 120px); /* Full height minus buttons and input */
+		height: calc(100vh - 190px); /* Full height minus nav, input container, and bottom buttons */
 		overflow-y: auto;
 	}
 	
@@ -90,7 +120,7 @@
 		}
 		
 		#all, #today, #completed {
-			height: calc(100vh - 140px); /* Account for mobile nav and bottom buttons */
+			height: calc(100vh - 210px); /* Account for mobile nav, input container, and bottom buttons */
 		}
 		
 		.nav-buttons button, .bottom-buttons button {
@@ -119,7 +149,7 @@
 	/* Extra small mobile devices */
 	@media screen and (max-width: 480px) {
 		#all, #today, #completed {
-			height: calc(100vh - 120px); /* Even more optimized for small screens */
+			height: calc(100vh - 190px); /* Even more optimized for small screens */
 		}
 		
 		body {
@@ -139,7 +169,7 @@
 	/* Navigation buttons container */
 	.nav-buttons {
 		display: flex;
-		justify-content: space-around;
+		justify-content: space-evenly;
 		padding: 10px;
 		background-color: #000;
 		border-bottom: 1px solid #333;
@@ -148,6 +178,43 @@
 	.nav-buttons button {
 		flex: 1;
 		margin: 0 5px;
+		padding: 12px 15px;
+		background-color: #000;
+		border: 2px solid rgba(255, 180, 60, 0.6);
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		text-align: center;
+		font-size: 1.1em;
+		color: #fff;
+		text-shadow: 
+			0 0 8px rgba(255, 255, 255, 0.7),
+			0 0 16px rgba(255, 255, 255, 0.5);
+		box-shadow: 
+			0 0 10px rgba(255, 180, 60, 0.4),
+			inset 0 0 10px rgba(255, 180, 60, 0.1);
+	}
+	
+	.nav-buttons button:hover {
+		background-color: #111;
+		border-color: rgba(255, 180, 60, 0.8);
+		text-shadow: 
+			0 0 12px rgba(255, 255, 255, 0.9),
+			0 0 20px rgba(255, 255, 255, 0.7);
+		box-shadow: 
+			0 0 15px rgba(255, 180, 60, 0.6),
+			inset 0 0 15px rgba(255, 180, 60, 0.2);
+	}
+	
+	.nav-buttons button:active {
+		background-color: #222;
+		border-color: rgba(255, 180, 60, 1);
+		text-shadow: 
+			0 0 15px rgba(255, 255, 255, 1),
+			0 0 25px rgba(255, 255, 255, 0.8);
+		box-shadow: 
+			0 0 20px rgba(255, 180, 60, 0.8),
+			inset 0 0 20px rgba(255, 180, 60, 0.3);
 	}
 	
 	/* Bottom buttons container */
@@ -166,14 +233,58 @@
 	.bottom-buttons button {
 		flex: 1;
 		margin: 0 5px;
+		padding: 12px 15px;
+		background-color: #000;
+		border: 2px solid rgba(255, 180, 60, 0.6);
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		text-align: center;
+		font-size: 1.1em;
+		color: #fff;
+		text-shadow: 
+			0 0 8px rgba(255, 255, 255, 0.7),
+			0 0 16px rgba(255, 255, 255, 0.5);
+		box-shadow: 
+			0 0 10px rgba(255, 180, 60, 0.4),
+			inset 0 0 10px rgba(255, 180, 60, 0.1);
 	}
 	
-	/* Input container for search bar and ADD button */
+	.bottom-buttons button:hover {
+		background-color: #111;
+		border-color: rgba(255, 180, 60, 0.8);
+		text-shadow: 
+			0 0 12px rgba(255, 255, 255, 0.9),
+			0 0 20px rgba(255, 255, 255, 0.7);
+		box-shadow: 
+			0 0 15px rgba(255, 180, 60, 0.6),
+			inset 0 0 15px rgba(255, 180, 60, 0.2);
+	}
+	
+	.bottom-buttons button:active {
+		background-color: #222;
+		border-color: rgba(255, 180, 60, 1);
+		text-shadow: 
+			0 0 15px rgba(255, 255, 255, 1),
+			0 0 25px rgba(255, 255, 255, 0.8);
+		box-shadow: 
+			0 0 20px rgba(255, 180, 60, 0.8),
+			inset 0 0 20px rgba(255, 180, 60, 0.3);
+	}
+	
+	/* Input container for search bar and ADD button - Fixed position */
 	.input-container {
+		position: fixed;
+		top: 70px; /* Position below navigation buttons with proper spacing */
+		left: 0;
+		right: 0;
 		display: flex;
 		align-items: center;
 		padding: 10px;
 		gap: 10px;
+		background-color: #000;
+		border-bottom: 1px solid #333;
+		z-index: 500; /* Below menus but above content */
 	}
 	
 	.input-container input[type="text"] {
@@ -184,14 +295,52 @@
 	.input-container button {
 		margin: 0;
 		white-space: nowrap;
+		padding: 12px 15px;
+		background-color: #000;
+		border: 2px solid rgba(255, 180, 60, 0.6);
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		text-align: center;
+		font-size: 1.1em;
+		color: #fff;
+		text-shadow: 
+			0 0 8px rgba(255, 255, 255, 0.7),
+			0 0 16px rgba(255, 255, 255, 0.5);
+		box-shadow: 
+			0 0 10px rgba(255, 180, 60, 0.4),
+			inset 0 0 10px rgba(255, 180, 60, 0.1);
+	}
+
+	.input-container button:hover {
+		background-color: #111;
+		border-color: rgba(255, 180, 60, 0.8);
+		text-shadow: 
+			0 0 12px rgba(255, 255, 255, 0.9),
+			0 0 20px rgba(255, 255, 255, 0.7);
+		box-shadow: 
+			0 0 15px rgba(255, 180, 60, 0.6),
+			inset 0 0 15px rgba(255, 180, 60, 0.2);
+	}
+
+	.input-container button:active {
+		background-color: #222;
+		border-color: rgba(255, 180, 60, 1);
+		text-shadow: 
+			0 0 15px rgba(255, 255, 255, 1),
+			0 0 25px rgba(255, 255, 255, 0.8);
+		box-shadow: 
+			0 0 20px rgba(255, 180, 60, 0.8),
+			inset 0 0 20px rgba(255, 180, 60, 0.3);
 	}
 	
 	/* Ensure full height containers */
 	#all, #today, #completed {
-		height: calc(100vh - 120px); /* Account for top nav and bottom buttons */
+		height: calc(100vh - 190px); /* Account for top nav, input container, and bottom buttons */
 		display: flex;
 		flex-direction: column;
 		padding-bottom: 60px; /* Space for bottom buttons */
+		margin-top: 70px; /* Space for fixed input container */
 	}
 	
 	#all #taskLists, #today #taskLists, #completed #taskLists {
@@ -203,12 +352,43 @@
 		
 		button {
 			font-size: 120%;
-			padding: 1% 5%;
+			padding: 12px 15px;
 			margin: 1%;
-			border-radius: 10px;
-			background-color: #333; /* Medium dark grey color */
-			border: none;
-			color: white; /* White text color */
+			background-color: #000;
+			border: 2px solid rgba(255, 180, 60, 0.6);
+			border-radius: 8px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			text-align: center;
+			color: #fff;
+			text-shadow: 
+				0 0 8px rgba(255, 255, 255, 0.7),
+				0 0 16px rgba(255, 255, 255, 0.5);
+			box-shadow: 
+				0 0 10px rgba(255, 180, 60, 0.4),
+				inset 0 0 10px rgba(255, 180, 60, 0.1);
+		}
+		
+		button:hover {
+			background-color: #111;
+			border-color: rgba(255, 180, 60, 0.8);
+			text-shadow: 
+				0 0 12px rgba(255, 255, 255, 0.9),
+				0 0 20px rgba(255, 255, 255, 0.7);
+			box-shadow: 
+				0 0 15px rgba(255, 180, 60, 0.6),
+				inset 0 0 15px rgba(255, 180, 60, 0.2);
+		}
+		
+		button:active {
+			background-color: #222;
+			border-color: rgba(255, 180, 60, 1);
+			text-shadow: 
+				0 0 15px rgba(255, 255, 255, 1),
+				0 0 25px rgba(255, 255, 255, 0.8);
+			box-shadow: 
+				0 0 20px rgba(255, 180, 60, 0.8),
+				inset 0 0 20px rgba(255, 180, 60, 0.3);
 		}
 		
 		input[type="text"], input[type="button"] {
@@ -223,19 +403,90 @@
 	
 	
 	.button-clicked {
-		border: 1px solid yellow; /* Yellow border */
-		color: white; /* White text color */
-		background-color: #555; /* Medium dark grey color */
+		border: 1px solid #ff6600; /* Orange border */
+		color: #ffaa44 !important; /* Bright orange text color - override dimmed color */
+		background-color: #332211 !important; /* Dark bronze background - override dimmed bg */
+		opacity: 1 !important; /* Full opacity - override dimmed opacity */
+		box-shadow: 
+			0 0 10px #ff6600,
+			0 0 20px #ff4400,
+			0 0 30px #ff2200,
+			inset 0 0 10px rgba(255, 102, 0, 0.2);
+		text-shadow: 0 0 8px #ff6600;
+		transform: scale(1.02);
+		transition: all 0.3s ease;
 	}
 
-	.end-day-button {
-		color: #f30; /* White text color */
-		background-color: #333; /* Medium dark grey color */
-	}
+
 
 	.close-button {
-		color: #f30; /* Orange text color */
-		background-color: #333; /* Medium dark grey color */
+		color: #ff4422 !important; /* Bright red text color */
+		background-color: #000 !important; /* Black background like other menu items */
+		border: 2px solid rgba(255, 68, 34, 0.6) !important; /* Red orangey border to match the theme */
+		text-shadow: 
+			0 0 8px rgba(255, 68, 34, 0.7),
+			0 0 16px rgba(255, 68, 34, 0.5) !important;
+		box-shadow: 
+			0 0 10px rgba(255, 68, 34, 0.4),
+			inset 0 0 10px rgba(255, 68, 34, 0.1) !important;
+		font-weight: normal !important;
+	}
+
+	.close-button:hover {
+		background-color: #111 !important;
+		border-color: rgba(255, 68, 34, 0.8) !important;
+		text-shadow: 
+			0 0 12px rgba(255, 68, 34, 0.9),
+			0 0 20px rgba(255, 68, 34, 0.7) !important;
+		box-shadow: 
+			0 0 15px rgba(255, 68, 34, 0.6),
+			inset 0 0 15px rgba(255, 68, 34, 0.2) !important;
+	}
+
+	.close-button:active {
+		background-color: #222 !important;
+		border-color: rgba(255, 68, 34, 1) !important;
+		text-shadow: 
+			0 0 15px rgba(255, 68, 34, 1),
+			0 0 25px rgba(255, 68, 34, 0.8) !important;
+		box-shadow: 
+			0 0 20px rgba(255, 68, 34, 0.8),
+			inset 0 0 20px rgba(255, 68, 34, 0.3) !important;
+	}
+
+	.bottom-buttons button.end-day-button {
+		color: #ff4422 !important; /* Bright red text color */
+		background-color: #000 !important; /* Black background like other menu items */
+		border: 2px solid rgba(255, 68, 34, 0.6) !important; /* Red orangey border to match the theme */
+		text-shadow: 
+			0 0 8px rgba(255, 68, 34, 0.7),
+			0 0 16px rgba(255, 68, 34, 0.5) !important;
+		box-shadow: 
+			0 0 10px rgba(255, 68, 34, 0.4),
+			inset 0 0 10px rgba(255, 68, 34, 0.1) !important;
+		font-weight: normal !important;
+	}
+
+	.bottom-buttons button.end-day-button:hover {
+		background-color: #111 !important;
+		border-color: rgba(255, 68, 34, 0.8) !important;
+		text-shadow: 
+			0 0 12px rgba(255, 68, 34, 0.9),
+			0 0 20px rgba(255, 68, 34, 0.7) !important;
+		box-shadow: 
+			0 0 15px rgba(255, 68, 34, 0.6),
+			inset 0 0 15px rgba(255, 68, 34, 0.2) !important;
+	}
+
+	.bottom-buttons button.end-day-button:active {
+		background-color: #222 !important;
+		border-color: rgba(255, 68, 34, 1) !important;
+		text-shadow: 
+			0 0 15px rgba(255, 68, 34, 1),
+			0 0 25px rgba(255, 68, 34, 0.8) !important;
+		box-shadow: 
+			0 0 20px rgba(255, 68, 34, 0.8),
+			inset 0 0 20px rgba(255, 68, 34, 0.3) !important;
 	}
 
 
@@ -253,11 +504,13 @@
         <button onclick="show('completed')">COMPLETED</button>
     </div>
 	
+    <!-- Fixed Input Container - Always Visible -->
+    <div class="input-container">
+        <input type="text" id="taskInput" onkeydown="if (event.keyCode == 13) addTask()" placeholder="Enter new task...">
+        <button onclick="addTask()">ADD</button>
+    </div>
+
     <div id="all">
-        <div class="input-container">
-            <input type="text" id="taskInput" onkeydown="if (event.keyCode == 13) addTask()" placeholder="Enter new task...">
-            <button onclick="addTask()">ADD</button>
-        </div>
 		<div id='taskLists'>
             <div id="allTasks"></div>
 		</div>
@@ -290,6 +543,7 @@
         <div class="menu-item" onclick="uploadTasks()">Upload Tasks</div>
         <div class="menu-item" onclick="importFromText()">Import from Text</div>
         <div class="menu-item" onclick="clearCache()">Update App</div>
+        <div class="menu-item" onclick="toggleMobileConsole(); hideSettings();">Show Debug Console</div>
         <div class="menu-item close-button" onclick="hideSettings()">Close Menu</div>
     </div>
 
@@ -305,6 +559,11 @@
 
     <div id="menu"></div>
 
+    <!-- Visual Console for Mobile Debugging -->
+    <div id="mobileConsole" style="display: none; position: fixed; bottom: 80px; left: 10px; right: 10px; background: rgba(0,0,0,0.9); color: #0f0; font-family: monospace; font-size: 10px; padding: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto; z-index: 9999; border: 1px solid #333;">
+        <div style="color: #fff; font-weight: bold; margin-bottom: 5px;">Console Log <button onclick="toggleMobileConsole()" style="float: right; background: #333; color: white; border: none; border-radius: 3px; padding: 2px 5px;">Hide</button></div>
+        <div id="consoleContent"></div>
+    </div>
 
     <script>
 	
@@ -324,18 +583,114 @@
         let tasks = [];
         let selectedTaskIndex = null;
 		
+		// Mobile Console Functions
+		let mobileConsoleVisible = false;
+		let consoleMessages = [];
+		
+		function showMobileConsole() {
+			mobileConsoleVisible = true;
+			document.getElementById('mobileConsole').style.display = 'block';
+		}
+		
+		function hideMobileConsole() {
+			mobileConsoleVisible = false;
+			document.getElementById('mobileConsole').style.display = 'none';
+		}
+		
+		function toggleMobileConsole() {
+			if (mobileConsoleVisible) {
+				hideMobileConsole();
+			} else {
+				showMobileConsole();
+			}
+		}
+		
+		function addToMobileConsole(message, type = 'log') {
+			const timestamp = new Date().toLocaleTimeString();
+			const color = type === 'error' ? '#f44' : type === 'warn' ? '#fa4' : '#0f0';
+			consoleMessages.push(`<div style="color: ${color};">[${timestamp}] ${message}</div>`);
+			
+			// Keep only last 50 messages
+			if (consoleMessages.length > 50) {
+				consoleMessages.shift();
+			}
+			
+			const consoleContent = document.getElementById('consoleContent');
+			if (consoleContent) {
+				consoleContent.innerHTML = consoleMessages.join('');
+				consoleContent.scrollTop = consoleContent.scrollHeight;
+			}
+		}
+		
+		// Override console methods to capture logs
+		const originalConsoleLog = console.log;
+		const originalConsoleError = console.error;
+		const originalConsoleWarn = console.warn;
+		
+		console.log = function(...args) {
+			originalConsoleLog.apply(console, args);
+			addToMobileConsole(args.join(' '), 'log');
+		};
+		
+		console.error = function(...args) {
+			originalConsoleError.apply(console, args);
+			addToMobileConsole(args.join(' '), 'error');
+		};
+		
+		console.warn = function(...args) {
+			originalConsoleWarn.apply(console, args);
+			addToMobileConsole(args.join(' '), 'warn');
+		};
+		
 		function addTask() {
-			let taskName = document.getElementById('taskInput').value;
+			let taskInput = document.getElementById('taskInput');
+			let taskName = taskInput.value;
 			
 			// Check if the input field is not blank
 			if (taskName.trim() !== '') {
+				// Determine which scroll position to restore
+				const currentSection = getCurrentSection();
+				let scrollPositionToRestore = 0;
+				
+				if (currentSection === 'all') {
+					// If we have a search active and stored position from before search, use that
+					if (scrollPositionBeforeSearch > 0 && (lastFilterValue !== null && lastFilterValue !== '')) {
+						scrollPositionToRestore = scrollPositionBeforeSearch;
+					} else {
+						// Otherwise, use current scroll position
+						const taskListContainer = document.querySelector(`#${currentSection} #taskLists`);
+						if (taskListContainer) {
+							scrollPositionToRestore = taskListContainer.scrollTop;
+						}
+					}
+				}
+				
 				tasks.unshift(new Task(taskName)); 
 				localStorage.setItem('tasks', JSON.stringify(tasks)); 
-				document.getElementById('taskInput').value = '';
+				taskInput.value = '';
 				// Clear any pending search timeout
 				clearTimeout(searchTimeout);
-				// Update the task list with empty filter to show all tasks
-				updateTaskList('').catch(console.error);
+				// Reset filter tracking to force update
+				lastFilterValue = null;
+				// Reset the stored scroll position since search is cleared
+				scrollPositionBeforeSearch = 0;
+				
+				// For 'all' section, handle scroll position preservation directly
+				if (currentSection === 'all') {
+					// Update the task list (since input is cleared, search value is empty)
+					updateTaskList('');
+					
+					// Restore scroll position immediately after DOM update
+					setTimeout(() => {
+						const taskListContainer = document.querySelector(`#${currentSection} #taskLists`);
+						if (taskListContainer && scrollPositionToRestore > 0) {
+							taskListContainer.scrollTop = scrollPositionToRestore;
+						}
+					}, 0);
+				} else {
+					// For other sections, use the existing method
+					refreshAllSections(true);
+				}
 			}
 		}
 		
@@ -371,13 +726,13 @@
 						// Check if taskName is null or empty
 			if (!taskName) {
 				hideMenu();
-				show(getCurrentSection()).catch(console.error);
+				refreshAllSections();
 				return; // Exit the function early
 			}
 			tasks.push(new Task(taskName));
 			hideMenu();
 			localStorage.setItem('tasks', JSON.stringify(tasks));
-			show(getCurrentSection()).catch(console.error);
+			refreshAllSections();
 		}
 
         function hideMenu() {
@@ -461,55 +816,78 @@
             }
 			localStorage.setItem('tasks', JSON.stringify(tasks));
             hideMenu();
-            show(getCurrentSection()).catch(console.error);
+            refreshAllSections();
         }
 
         function toggleRecurring() {
             tasks[selectedTaskIndex].recurring = !tasks[selectedTaskIndex].recurring;
             hideMenu();
 			localStorage.setItem('tasks', JSON.stringify(tasks));
-            show(getCurrentSection()).catch(console.error);
+            refreshAllSections();
         }
 
         function deleteTask() {
             tasks.splice(selectedTaskIndex, 1);
             hideMenu();
 			localStorage.setItem('tasks', JSON.stringify(tasks));
-            show(getCurrentSection()).catch(console.error);
+            refreshAllSections();
         }
 
         function completeTask() {
             tasks[selectedTaskIndex].status = 2;
-            tasks[selectedTaskIndex].dates_completed.push(Date().now());
+            tasks[selectedTaskIndex].dates_completed.push(Date.now());
 			localStorage.setItem('tasks', JSON.stringify(tasks));
             hideMenu();
-            show(getCurrentSection()).catch(console.error);
+            refreshAllSections();
         }
 
 		// Debounced search function to prevent input field reset
 		let searchTimeout;
-		document.getElementById('taskInput').addEventListener('input', function() {
+		document.getElementById('taskInput').addEventListener('input', function(event) {
 			// Clear previous timeout
 			clearTimeout(searchTimeout);
 			
+			// Store current state immediately
+			const inputElement = this;
+			const currentValue = inputElement.value;
+			const currentCursorPosition = inputElement.selectionStart;
+			
+			// Capture scroll position before search starts (when transitioning from no search to search)
+			if (currentValue.length === 3 && (lastFilterValue === null || lastFilterValue === '')) {
+				const currentSection = getCurrentSection();
+				if (currentSection === 'all') {
+					const taskListContainer = document.querySelector(`#${currentSection} #taskLists`);
+					if (taskListContainer) {
+						scrollPositionBeforeSearch = taskListContainer.scrollTop;
+					}
+				}
+			}
+			
+			// Reset stored scroll position when search is completely cleared
+			if (currentValue.length === 0) {
+				scrollPositionBeforeSearch = 0;
+			}
+			
 			// Only search if 3 or more characters are entered or if cleared
-			if (this.value.length >= 3 || this.value.length === 0) {
+			if (currentValue.length >= 3 || currentValue.length === 0) {
 				// Debounce the search to prevent rapid firing
 				searchTimeout = setTimeout(() => {
-					// Store current input value
-					const currentValue = this.value;
-					
-					// Only update if we're in the 'all' section
+					// Only update if we're in the 'all' section and input hasn't changed
 					const currentSection = getCurrentSection();
-					if (currentSection === 'all') {
-						updateTaskList(currentValue).catch(console.error);
+					if (currentSection === 'all' && inputElement.value === currentValue) {
+						updateTaskList(currentValue.toLowerCase());
 					}
 				}, 300); // 300ms delay
 			}
 		});
 
+		// Keep track of last filter value to prevent unnecessary updates
+		let lastFilterValue = null;
+		// Track scroll position before search starts
+		let scrollPositionBeforeSearch = 0;
+		
 		// Function to update only the task list without affecting the input field
-		async function updateTaskList(filterValue) {
+		function updateTaskList(filterValue) {
 			if (!tasks) {
 				tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 			}
@@ -517,65 +895,78 @@
 			let allTasksDiv = document.getElementById('allTasks');
 			if (!allTasksDiv) return;
 			
-			// Store current focus state
-			const taskInput = document.getElementById('taskInput');
-			const wasFocused = document.activeElement === taskInput;
-			const cursorPosition = wasFocused ? taskInput.selectionStart : 0;
+			// Skip update if filter value hasn't changed (except for initial load)
+			if (lastFilterValue === filterValue && allTasksDiv.children.length > 0) {
+				return;
+			}
+			lastFilterValue = filterValue;
 			
-			showLoadingIndicator('allTasks');
+			// Filter and sort tasks
+			const filteredTasks = tasks.filter((task, index) => {
+				if (!matchesSearch(task.name, filterValue)) return false;
+				
+				const isCompleted = task.dates_completed.length > 0;
+				return filterValue.length === 0 ? 
+					!(task.recurring === false && isCompleted) : 
+					true;
+			}).sort((a, b) => b.date_created - a.date_created);
 			
-			// Filter tasks asynchronously
-			const filteredTasks = [];
-			await new Promise((resolve) => {
-				setTimeout(() => {
-					tasks.forEach((task, index) => {
-						if (matchesSearch(task.name, filterValue)) {
-							const isCompleted = task.dates_completed.length > 0;
-							const shouldShow = filterValue.length === 0 ? 
-								!(task.recurring === false && isCompleted) : 
-								true;
-							
-							if (shouldShow) {
-								filteredTasks.push({ task, index });
-							}
-						}
-					});
-					
-					// Sort tasks by creation date (newest first)
-					filteredTasks.sort((a, b) => b.task.date_created - a.task.date_created);
-					
-					resolve();
-				}, 0);
-			});
-
-			// Render tasks in batches
-			allTasksDiv.innerHTML = '';
-			await renderTasksBatch(filteredTasks, allTasksDiv, ({ task, index }) => {
+			// Create DocumentFragment for efficient DOM manipulation
+			const fragment = document.createDocumentFragment();
+			
+			filteredTasks.forEach(task => {
 				const isCompleted = task.dates_completed.length > 0;
 				const taskColor = isCompleted ? 'orange' : 'white';
-				// Use the original index from the main tasks array for accurate targeting
 				const originalIndex = tasks.indexOf(task);
-				let taskHtml = `<input type="checkbox" onclick="toggleAll(${originalIndex})" ${task.status > 0 ? 'checked' : ''}><label style="padding-left: 15px;"><span style="color: ${taskColor};" onclick="showMenu(event, ${originalIndex})">${task.name}</span>`;
+				
+				// Create task container
+				const taskContainer = document.createElement('div');
+				
+				// Create checkbox
+				const checkbox = document.createElement('input');
+				checkbox.type = 'checkbox';
+				checkbox.checked = task.status > 0;
+				checkbox.onclick = () => toggleAll(originalIndex);
+				
+				// Create label
+				const label = document.createElement('label');
+				label.style.paddingLeft = '15px';
+				
+				// Create task name span
+				const taskSpan = document.createElement('span');
+				taskSpan.style.color = taskColor;
+				taskSpan.textContent = task.name;
+				taskSpan.onclick = (event) => showMenu(event, originalIndex);
+				
+				label.appendChild(taskSpan);
 				
 				// Add completion date for completed tasks
 				if (isCompleted && task.dates_completed.length > 0) {
+					const dateSpan = document.createElement('span');
+					dateSpan.style.color = '#888';
+					dateSpan.style.fontSize = '0.7em';
+					dateSpan.style.marginLeft = '10px';
 					const lastCompletedDate = new Date(task.dates_completed[task.dates_completed.length - 1]).toLocaleDateString('en-US', { 
 						year: 'numeric', 
 						month: 'short', 
 						day: 'numeric' 
 					});
-					taskHtml += `<span style="color: #888; font-size: 0.7em; margin-left: 10px;">last completed: ${lastCompletedDate}</span>`;
+					dateSpan.textContent = `last completed: ${lastCompletedDate}`;
+					label.appendChild(dateSpan);
 				}
 				
-				taskHtml += '<br>';
-				allTasksDiv.innerHTML += taskHtml;
-			}, 15);
+				// Add line break
+				const br = document.createElement('br');
+				
+				taskContainer.appendChild(checkbox);
+				taskContainer.appendChild(label);
+				taskContainer.appendChild(br);
+				fragment.appendChild(taskContainer);
+			});
 			
-			// Restore focus and cursor position if it was focused before
-			if (wasFocused) {
-				taskInput.focus();
-				taskInput.setSelectionRange(cursorPosition, cursorPosition);
-			}
+			// Replace all content at once - this won't affect input field focus
+			allTasksDiv.innerHTML = '';
+			allTasksDiv.appendChild(fragment);
 		}
 
 		function matchesSearch(taskName, searchTerms) {
@@ -625,8 +1016,11 @@
 
 		if (section === 'all') {
 			document.getElementById('all').style.display = 'block';
+			// Store input state before updating task list
+			const taskInputElement = document.getElementById('taskInput');
+			const searchValue = taskInputElement.value;
 			// Use the updateTaskList function to preserve input field
-			await updateTaskList(document.getElementById('taskInput').value.toLowerCase());
+			updateTaskList(searchValue.toLowerCase());
 
 		} else if (section === 'today') {
 			let todayTasksDiv = document.getElementById('todayTasks');
@@ -714,6 +1108,37 @@
             });
         }
 
+        function refreshAllSections(preserveScroll = false) {
+            // Store current scroll position if requested
+            let scrollPosition = 0;
+            if (preserveScroll) {
+                const currentSection = getCurrentSection();
+                const taskListContainer = document.querySelector(`#${currentSection} #taskLists`);
+                if (taskListContainer) {
+                    scrollPosition = taskListContainer.scrollTop;
+                }
+            }
+            
+            // Clear any cached filter values to force refresh
+            lastFilterValue = null;
+            
+            // Get current section to restore after refresh
+            const currentSection = getCurrentSection();
+            
+            // Refresh the current section to show updated task list
+            show(currentSection).then(() => {
+                // Restore scroll position if requested
+                if (preserveScroll && scrollPosition > 0) {
+                    setTimeout(() => {
+                        const taskListContainer = document.querySelector(`#${currentSection} #taskLists`);
+                        if (taskListContainer) {
+                            taskListContainer.scrollTop = scrollPosition;
+                        }
+                    }, 0);
+                }
+            }).catch(console.error);
+        }
+
         function endDay() {
             // Check if we're currently in the today section
             const currentSection = getCurrentSection();
@@ -731,7 +1156,7 @@
                         task.status = 0;
                     });
                     localStorage.setItem('tasks', JSON.stringify(tasks));
-                    show('today').catch(console.error);
+                    refreshAllSections();
                 }
             }
         }
@@ -754,7 +1179,7 @@
 				reader.onload = () => {
 					tasks = JSON.parse(reader.result);
 					localStorage.setItem('tasks', JSON.stringify(tasks)); // Store the uploaded tasks in localStorage
-					show('all').catch(console.error); // Refresh the page with the uploaded tasks
+					refreshAllSections(true); // Refresh the page with the uploaded tasks, preserving scroll
 				 }
 				reader.readAsText(file);
 			 };
@@ -828,9 +1253,9 @@
 			// Save to localStorage
 			localStorage.setItem('tasks', JSON.stringify(tasks));
 			
-			// Close dialog and refresh
+			// Close dialog and refresh, preserving scroll position
 			hideImportDialog();
-			show(getCurrentSection()).catch(console.error);
+			refreshAllSections(true);
 			
 			// Show success message
 			alert(`Successfully imported ${newTasksCount} task${newTasksCount !== 1 ? 's' : ''}!`);
@@ -904,14 +1329,26 @@
 		// Service Worker Registration
 		if ('serviceWorker' in navigator) {
 			window.addEventListener('load', function() {
+				console.log('Registering service worker...');
 				navigator.serviceWorker.register('/sw.js')
 					.then(function(registration) {
 						console.log('ServiceWorker registration successful with scope: ', registration.scope);
 						
+						// Log current service worker state
+						if (registration.installing) {
+							console.log('Service Worker installing...');
+						} else if (registration.waiting) {
+							console.log('Service Worker waiting...');
+						} else if (registration.active) {
+							console.log('Service Worker active');
+						}
+						
 						// Check for updates
 						registration.addEventListener('updatefound', function() {
+							console.log('Service Worker update found');
 							const newWorker = registration.installing;
 							newWorker.addEventListener('statechange', function() {
+								console.log('Service Worker state changed to:', newWorker.state);
 								if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
 									console.log('New service worker available');
 									// Optionally notify user about update
@@ -925,13 +1362,16 @@
 						
 						// Handle service worker updates
 						navigator.serviceWorker.addEventListener('controllerchange', function() {
-							console.log('Service worker updated');
+							console.log('Service worker updated - reloading page');
+							window.location.reload();
 						});
 					})
 					.catch(function(err) {
-						console.log('ServiceWorker registration failed: ', err);
+						console.error('ServiceWorker registration failed: ', err);
 					});
 			});
+		} else {
+			console.log('Service workers not supported');
 		}
 		
 		// Check if app is running offline
