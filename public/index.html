@@ -97,20 +97,20 @@
 		}
 		
 		#allTasks, #todayTasks, #completedTasks {
-
 		    font-family: 'Courier New', courier, monospace;
 			font-size: 1em; /* Ensure consistent font size across all sections */
-
 			overflow-y: auto;
 			line-height: 2.5em;
 			color: #fff;   /* White text color for task lists */
-			padding: 10px;
+			padding: 0.5em; /* Use em units for padding */
 			margin: 0;
+			padding-bottom: 1em; /* Clean minimal padding with visual divider */
 		}
 		
 			#taskLists {
-		height: calc(100vh - 190px); /* Full height minus nav, input container, and bottom buttons */
+		height: calc(100vh - 190px); /* Clean calculation with visual divider handling separation */
 		overflow-y: auto;
+		padding-bottom: 1em; /* Simple padding with clear visual boundary */
 	}
 	
 	/* Mobile-specific styles */
@@ -120,7 +120,8 @@
 		}
 		
 		#all, #today, #completed {
-			height: calc(100vh - 210px); /* Account for mobile nav, input container, and bottom buttons */
+			height: calc(100vh - 210px); /* Mobile adjustment with visual divider */
+			padding-bottom: 6em; /* Extra space for mobile */
 		}
 		
 		.nav-buttons button, .bottom-buttons button {
@@ -149,7 +150,8 @@
 	/* Extra small mobile devices */
 	@media screen and (max-width: 480px) {
 		#all, #today, #completed {
-			height: calc(100vh - 190px); /* Even more optimized for small screens */
+			height: calc(100vh - 190px); /* Very small screens with visual divider */
+			padding-bottom: 5.5em;
 		}
 		
 		body {
@@ -217,23 +219,44 @@
 			inset 0 0 20px rgba(255, 180, 60, 0.3);
 	}
 	
-	/* Bottom buttons container */
-	.bottom-buttons {
+	/* Bottom section with clear separation */
+	.bottom-section {
 		position: fixed;
 		bottom: 0;
 		left: 0;
 		right: 0;
+		background-color: #000;
+		z-index: 100;
+	}
+	
+	/* Visual divider above bottom buttons */
+	.bottom-divider {
+		height: 3px;
+		background: linear-gradient(90deg, 
+			transparent 0%, 
+			rgba(255, 180, 60, 0.3) 10%, 
+			rgba(255, 180, 60, 0.8) 50%, 
+			rgba(255, 180, 60, 0.3) 90%, 
+			transparent 100%);
+		box-shadow: 
+			0 0 10px rgba(255, 180, 60, 0.5),
+			0 -2px 20px rgba(255, 180, 60, 0.3);
+	}
+	
+	/* Bottom buttons container */
+	.bottom-buttons {
 		display: flex;
 		justify-content: space-around;
-		padding: 10px;
+		padding: 0.8em 0.5em; /* More generous padding */
 		background-color: #000;
-		border-top: 1px solid #333;
+		min-height: 3.5em;
+		box-sizing: border-box;
 	}
 	
 	.bottom-buttons button {
 		flex: 1;
-		margin: 0 5px;
-		padding: 12px 15px;
+		margin: 0 0.3em;
+		padding: 0.7em 0.8em;
 		background-color: #000;
 		border: 2px solid rgba(255, 180, 60, 0.6);
 		border-radius: 8px;
@@ -336,16 +359,18 @@
 	
 	/* Ensure full height containers */
 	#all, #today, #completed {
-		height: calc(100vh - 190px); /* Account for top nav, input container, and bottom buttons */
+		height: calc(100vh - 190px); /* Account for top nav, input container, and bottom section */
 		display: flex;
 		flex-direction: column;
-		padding-bottom: 60px; /* Space for bottom buttons */
+		padding-bottom: 5.5em; /* Clean spacing for bottom section */
 		margin-top: 70px; /* Space for fixed input container */
 	}
 	
 	#all #taskLists, #today #taskLists, #completed #taskLists {
 		flex: 1;
 		overflow-y: auto;
+		padding-bottom: 2em; /* Simpler padding since we have visual divider */
+		box-sizing: border-box;
 	}
 
 		
@@ -528,12 +553,15 @@
 	    </div>
     </div>
 
-    <!-- Bottom Fixed Buttons -->
-    <div class="bottom-buttons">
-        <button onclick="zoomIn()">ZOOM IN</button>
-        <button onclick="zoomOut()">ZOOM OUT</button>
-        <button class="end-day-button" onclick="endDay()">END DAY</button>
-        <button onclick="showSettings(event)" id="settingsButton">SETTINGS</button>
+    <!-- Bottom Section with Divider -->
+    <div class="bottom-section">
+        <div class="bottom-divider"></div>
+        <div class="bottom-buttons">
+            <button onclick="zoomIn()">ZOOM IN</button>
+            <button onclick="zoomOut()">ZOOM OUT</button>
+            <button class="end-day-button" onclick="endDay()">END DAY</button>
+            <button onclick="showSettings(event)" id="settingsButton">SETTINGS</button>
+        </div>
     </div>
 
     <!-- Settings Menu -->
@@ -577,6 +605,7 @@
                 this.date_created = Date.now();
                 this.dates_completed = [];
                 this.recurring = false;
+                this.was_selected_today = false; // Track if task was selected for today but not completed
             }
         }
 
@@ -721,6 +750,7 @@
 		
 		function setStatus2AndAddTask() {
 			tasks[selectedTaskIndex].status = 2;
+			tasks[selectedTaskIndex].was_selected_today = false; // Clear flag when completed
 			let taskName = prompt('Enter new task name');
 			
 						// Check if taskName is null or empty
@@ -836,6 +866,7 @@
         function completeTask() {
             tasks[selectedTaskIndex].status = 2;
             tasks[selectedTaskIndex].dates_completed.push(Date.now());
+            tasks[selectedTaskIndex].was_selected_today = false; // Clear flag when completed
 			localStorage.setItem('tasks', JSON.stringify(tasks));
             hideMenu();
             refreshAllSections();
@@ -909,7 +940,14 @@
 				return filterValue.length === 0 ? 
 					!(task.recurring === false && isCompleted) : 
 					true;
-			}).sort((a, b) => b.date_created - a.date_created);
+			}).sort((a, b) => {
+				// First, prioritize tasks that were selected today but not completed
+				if (a.was_selected_today && !b.was_selected_today) return -1;
+				if (!a.was_selected_today && b.was_selected_today) return 1;
+				
+				// Then sort by creation date (newest first)
+				return b.date_created - a.date_created;
+			});
 			
 			// Create DocumentFragment for efficient DOM manipulation
 			const fragment = document.createDocumentFragment();
@@ -1082,6 +1120,12 @@
 
         function toggleAll(index) {
             tasks[index].status = tasks[index].status > 0 ? 0 : 1;
+            
+            // Clear the was_selected_today flag when task is selected again
+            if (tasks[index].status === 1) {
+                tasks[index].was_selected_today = false;
+            }
+            
 			localStorage.setItem('tasks', JSON.stringify(tasks)); // Save tasks to localStorage
 
             // Update only the checkbox state without re-rendering the entire list
@@ -1152,6 +1196,9 @@
                     tasks.forEach((task) => {
                         if (task.status === 2) {
                             task.dates_completed.push(Date.now());
+                        } else if (task.status === 1) {
+                            // Mark tasks that were selected but not completed
+                            task.was_selected_today = true;
                         }
                         task.status = 0;
                     });
